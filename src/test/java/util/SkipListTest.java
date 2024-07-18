@@ -12,6 +12,10 @@ import org.junit.jupiter.api.Test;
 public class SkipListTest {
     @Test
     public void doTest(){
-
+        SkipList<String> list = new SkipList<>();
+        list.add("alice", 1.0);
+        list.add("bob", 2.0);
+        list.add("?", -1.0);
+        System.out.println(list);
     }
 }
