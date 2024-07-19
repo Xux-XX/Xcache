@@ -2,6 +2,7 @@ package util;
 
 
 import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.core.RedisTemplate;
 
 /**
  * @author xux
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
  */
 
 public class SkipListTest {
+    RedisTemplate redis;
     @Test
     public void doTest(){
         SkipList<String> list = new SkipList<>();
@@ -17,5 +19,7 @@ public class SkipListTest {
         list.add("bob", 2.0);
         list.add("?", -1.0);
         System.out.println(list);
+
+        redis.opsForZSet().add("test", 1, 1);
     }
 }

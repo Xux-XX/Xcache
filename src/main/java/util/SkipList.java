@@ -15,18 +15,15 @@ public class SkipList<V> implements Iterable<SkipList.Node<V>> {
 
     /**
      * head 链表头节点<p>
-     * length 跳表长度<p>
      * maxLevel 跳表最大高度
      */
     private final Node<V> head;
-    private int length;
     private final int MAX_LEVEL = 32;
     private final Random random;
 
     public SkipList() {
         this.random = new Random();
         head = new Node<>(null, 0.0, MAX_LEVEL);
-        length = 0;
     }
 
     /**
@@ -36,20 +33,31 @@ public class SkipList<V> implements Iterable<SkipList.Node<V>> {
      * @return Iterator<V> 以新增节点为起点的迭代器
      */
     public Iterator<Node<V>> add(V value, double score){
-        int level = randomLevel();
-        Node<V> newNode = new Node<>(value, score, level);
         Node<V> current = head;
-        int[] rank = new int[level];
-        Node[] update = new Node[level];
-        for (int i = level - 1; i >= 0; i--){
-            rank[i] = (i == level - 1 ? 0 : rank[i+1]);
+        int[] rank = new int[MAX_LEVEL];
+        Node<V>[] update = new Node[MAX_LEVEL];
+        // 获取需要插入的地方
+        for (int i = MAX_LEVEL - 1; i >= 0; i--){
+            rank[i] = (i == MAX_LEVEL - 1 ? 0 : rank[i+1]);
             while (current.next[i] != null && current.next[i].score <= score){
+                rank[i] += current.span[i];
                 current = current.next[i];
             }
             update[i] = current;
         }
-
-        length ++;
+        // 修改指针指向并计算跨度
+        int level = randomLevel();
+        Node<V> newNode = new Node<>(value, score, level);
+        for(int i = level - 1; i >= 0; i--){
+            newNode.next[i] = update[i].next[i];
+            update[i].next[i] = newNode;
+            newNode.span[i] = update[i].span[i] - (rank[0] - rank[i]);
+            update[i].span[i] = (rank[0] - rank[i]) + 1;
+        }
+        // 将没有修改的层跨度加一
+        for (int i = level; i< MAX_LEVEL; i++){
+            update[i].span[i]++;
+        }
         return new ListIterator(newNode);
     }
 
@@ -172,11 +180,13 @@ public class SkipList<V> implements Iterable<SkipList.Node<V>> {
 
         @Override
         public void remove() {
-            Node<V> next = cursor.next[0];
-            for (int i=0; i < MAX_LEVEL && cursor.next[i] == next; i++){
-                cursor.next[i] = next.next[i];
+            Node<V> now = head;
+            double score = cursor.next[0].score;
+            for (int i = MAX_LEVEL - 1; i >= 0; i--){
+                while (now.next[i].score < score ){
+
+                }
             }
-            length--;
         }
 
         @Override
